@@ -61,5 +61,14 @@ class DataTransformer :
             if col not in self.ignored_cols:
                 self.data[col] = self.data[col].apply(lambda x: self.encode(col, x))
 
-        
-    
+    def transform(self, data_dict : dict):
+        for col, val in data_dict.items():
+            if col not in self.ignored_cols:
+                if col in self.numerical_cols :
+                    data_dict[col] = self.scale(col, val)
+                elif col in self.categorical_cols:
+                    data_dict[col] = self.encode(col, val)
+                else:
+                    pass
+        return data_dict
+
