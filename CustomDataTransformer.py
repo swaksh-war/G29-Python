@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 
 class DataTransformer : 
-    def __init__(self, dataset : pd.DataFrame = None, ignore_columns_to_transform : str = None):
-        self.ignored_cols = None
+    def __init__(self, dataset : pd.DataFrame = None, ignore_columns_to_transform : list[str] = None):
+        self.ignored_cols = ignore_columns_to_transform
         self.data = dataset
         self.numerical_cols, self.categorical_cols = self.get_num_cat_cols()
         self.min_max_values = self.get_min_max_values()
@@ -42,7 +42,24 @@ class DataTransformer :
             temp_label_map[col] = col_label_map
         return temp_label_map
 
+    def scale(self, col_name, x):
+        min_val = self.min_max_values[col_name][0]
+        max_val = self.min_max_values[col_name][1]
+        scaled_x = (x - min_val) / (max_val - min_val)
+        return scaled_x
 
+    def encode(self, col_name, x):
+        encoder_dict = self.label_map[col_name]
+        return encoder_dict[x]
 
+    def fit_transform(self):
+        for col in self.numerical_cols:
+            if col not in self.ignored_cols:
+                self.data[col] = self.data[col].apply(lambda x: self.scale(col, x))
+        
+        for col in self.categorical_cols:
+            if col not in self.ignored_cols:
+                self.data[col] = self.data[col].apply(lambda x: self.encode(col, x))
 
+        
     
